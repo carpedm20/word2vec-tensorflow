@@ -57,7 +57,7 @@ class Word2Vec(object):
         self.idx2word = idx2word
 
         self.decay = (self.min_lr-self.lr)/(self.total_count*self.window)
-        self.labels = np.zeros(1+self.neg_sample_size, dtype=np.float32); self.labels[0] = 1
+        self.labels = np.zeros([1, 1+self.neg_sample_size], dtype=np.float32); self.labels[0][0] = 1
         self.contexts = np.ndarray(1 + self.neg_sample_size, dtype=np.int32)
         self.build_model()
 
@@ -75,13 +75,13 @@ class Word2Vec(object):
         self.mul = tf.matmul(self.x_embed, self.y_w, transpose_b=True)
         self.p = tf.nn.sigmoid(self.mul)
 
-        self.loss = tf.nn.sigmoid_cross_entropy_with_logits(self.p, self.labels)
+        self.loss = tf.nn.softmax_cross_entropy_with_logits(self.p, self.labels)
         self.train = tf.train.GradientDescentOptimizer(0.001).minimize(self.loss)
 
         self.sess.run(tf.initialize_all_variables())
 
-    def train_pair(self, word, contexts):
-        self.sess.run(self.train, feed_dict={self.x: [word], self.y: contexts})
+    def train_pair(self, word_idx, contexts):
+        self.sess.run(self.train, feed_dict={self.x: [word_idx], self.y: contexts})
 
     def build_table(self):
         start_time = time.time()
@@ -130,8 +130,9 @@ class Word2Vec(object):
                                 self.train_pair(word_idx, self.contexts)
                                 self.lr = max(self.min_lr, self.lr + self.decay)
                                 c += 1
-                                if c % 10000 == 0:
-                                    print("%d words trained in %.2f seconds. Learning rate: %.4f" % (c, time.time() - time, self.lr))
+                                if c % 100000 == 0:
+                                    loss = self.sess.run(self.loss, feed_dict={self.x: [word_idx], self.y: self.contexts})
+                                    print("%d words trained in %.2f seconds. Learning rate: %.4f, Loss : %.4f" % (c, time.time() - start_time, self.lr, loss))
                             except:
                                 continue
                 except:
