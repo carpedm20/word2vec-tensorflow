@@ -1,5 +1,5 @@
 import os
-import tensorflow as tf
+
 from model import Word2Vec
 
 config = {}
