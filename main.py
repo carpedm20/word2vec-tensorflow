@@ -25,4 +25,4 @@ with tf.Session() as sess:
         w2v.lr = config['lr']
         w2v.train_model(config['corpus'])
 
-    w2v.print_sim_words(['the', 'he', 'can'], 5)
+    w2v.get_sim_words(['the', 'he', 'can'], 5)
