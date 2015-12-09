@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import os
 import time
+import random
 import tensorflow as tf
 from collections import defaultdict, Counter
 
@@ -57,6 +58,7 @@ class Word2Vec(object):
         for _, count in self.counter:
             total_count_pow += math.pow(count, self.alpha)
         word_index = 0
+        self.table = np.ndarray([self.table_size])
         word_prob = math.pow(self.counter[word_index], self.alph) / total_count_pow
         for idx in xrange(self.table_size):
             self.table[idx] = word_index
@@ -72,5 +74,18 @@ class Word2Vec(object):
 
     def sample_contexts(context):
         self.contexts[0] = context
-        for idx in xrange(sef.neg_smaple_size):
+        idx = 0
+        while idx < self.neg_samples:
             neg_context = self.table[random.rand(self.table_size)]
+            if context != neg_context:
+                self.contexts[idx+2] = neg_context
+                idx += 1
+
+    def train_stream(filename):
+        print("Training...")
+
+        start_time = time.time()
+        c = 0
+        with open(filename) as f:
+            sentence = f.readlines()
+
